@@ -23,7 +23,7 @@ const app = new Hono<{ Bindings: Env }>()
 app.use('*', logger())
 app.use('*', prettyJSON())
 app.use('*', cors({
-  origin: ['http://localhost:3000', 'https://futmanager.pages.dev'],
+  origin: ['http://localhost:3000', 'https://fut-manager-sec-frontend.vercel.app'],
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   allowHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
