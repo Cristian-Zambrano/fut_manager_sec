@@ -51,4 +51,12 @@ app.route('/api/players', playerRoutes)
 app.route('/api/sanctions', sanctionRoutes)
 app.route('/api/audit', auditRoutes)
 
+// Additional protected route for teams (also needs auth)
+app.use('/teams/*', authMiddleware)
+app.route('/teams', teamRoutes)
+
+// Additional protected route for players (also needs auth)
+app.use('/players/*', authMiddleware)
+app.route('/players', playerRoutes)
+
 export default app

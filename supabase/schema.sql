@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 CREATE TABLE IF NOT EXISTS teams (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
   owner_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -30,9 +31,13 @@ CREATE TABLE IF NOT EXISTS players (
   name VARCHAR(255) NOT NULL,
   surname VARCHAR(255) NOT NULL,
   team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
+  position VARCHAR(50),
+  jersey_number INTEGER CHECK (jersey_number >= 1 AND jersey_number <= 99),
   verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  -- Ensure jersey number is unique within a team
+  UNIQUE(team_id, jersey_number)
 );
 
 -- Create sanctions table
