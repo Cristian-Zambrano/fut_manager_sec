@@ -49,3 +49,5 @@ packages/backend/logs/
 # Frontend specific  
 packages/frontend/.env
 packages/frontend/dist/
+
+.wrangler
