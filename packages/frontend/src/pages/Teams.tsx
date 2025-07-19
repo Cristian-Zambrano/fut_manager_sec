@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { createClient } from '@supabase/supabase-js'
+import { getApiUrl } from '../utils/api'
 
 // Create Supabase client
 const supabase = createClient(
@@ -48,7 +49,7 @@ const Teams: React.FC = () => {
         return
       }
 
-      const response = await fetch('/api/teams', {
+      const response = await fetch(getApiUrl('api/teams'), {
         headers: {
           'Authorization': `Bearer ${session.session.access_token}`,
           'Content-Type': 'application/json'
@@ -81,7 +82,7 @@ const Teams: React.FC = () => {
         throw new Error('Authentication required')
       }
 
-      const response = await fetch('/api/teams', {
+      const response = await fetch(getApiUrl('api/teams'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.session.access_token}`,
@@ -115,7 +116,7 @@ const Teams: React.FC = () => {
         throw new Error('Authentication required')
       }
 
-      const response = await fetch(`/api/teams/${teamId}/verify`, {
+      const response = await fetch(getApiUrl(`api/teams/${teamId}/verify`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${session.session.access_token}`,
@@ -147,7 +148,7 @@ const Teams: React.FC = () => {
         throw new Error('Authentication required')
       }
 
-      const response = await fetch(`/api/teams/${teamId}`, {
+      const response = await fetch(getApiUrl(`api/teams/${teamId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.session.access_token}`,

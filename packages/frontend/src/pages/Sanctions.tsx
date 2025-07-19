@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { getApiUrl } from '../utils/api'
 
 interface Player {
   id: string
@@ -73,7 +74,7 @@ const Sanctions: React.FC = () => {
         throw new Error('No authentication token available')
       }
       
-      const response = await fetch('/api/sanctions', {
+      const response = await fetch(getApiUrl('api/sanctions'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -100,7 +101,7 @@ const Sanctions: React.FC = () => {
       }
       
       // Fetch players
-      const playersResponse = await fetch('/api/players', {
+      const playersResponse = await fetch(getApiUrl('api/players'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -113,7 +114,7 @@ const Sanctions: React.FC = () => {
       }
 
       // Fetch teams
-      const teamsResponse = await fetch('/api/teams', {
+      const teamsResponse = await fetch(getApiUrl('api/teams'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -173,7 +174,7 @@ const Sanctions: React.FC = () => {
         requestBody.team_id = createSanctionData.team_id
       }
 
-      const response = await fetch('/api/sanctions', {
+      const response = await fetch(getApiUrl('api/sanctions'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -214,7 +215,7 @@ const Sanctions: React.FC = () => {
         throw new Error('No authentication token available')
       }
       
-      const response = await fetch(`/api/sanctions/${sanctionId}`, {
+      const response = await fetch(getApiUrl(`api/sanctions/${sanctionId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

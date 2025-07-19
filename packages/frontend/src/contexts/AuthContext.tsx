@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { getApiUrl } from '../utils/api'
 
 // Create Supabase client
 const supabase = createClient(
@@ -119,7 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setLoading(true)
       
       // Call backend registration endpoint
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(getApiUrl('api/auth/register'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

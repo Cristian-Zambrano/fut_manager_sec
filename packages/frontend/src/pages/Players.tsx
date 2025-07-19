@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
+import { getApiUrl } from '../utils/api'
 
 // Create Supabase client
 const supabase = createClient(
@@ -63,7 +64,7 @@ const Players: React.FC = () => {
         return
       }
 
-      const response = await fetch('/api/players', {
+      const response = await fetch(getApiUrl('api/players'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -92,7 +93,7 @@ const Players: React.FC = () => {
         return
       }
 
-      const response = await fetch('/api/teams', {
+      const response = await fetch(getApiUrl('api/teams'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -136,7 +137,7 @@ const Players: React.FC = () => {
         return
       }
 
-      const response = await fetch('/api/players', {
+      const response = await fetch(getApiUrl('api/players'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -179,7 +180,7 @@ const Players: React.FC = () => {
         return
       }
 
-      const response = await fetch(`/api/players/${playerId}/verify`, {
+      const response = await fetch(getApiUrl(`api/players/${playerId}/verify`), {
         method: 'PATCH',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -216,7 +217,7 @@ const Players: React.FC = () => {
         return
       }
 
-      const response = await fetch(`/api/players/${playerId}`, {
+      const response = await fetch(getApiUrl(`api/players/${playerId}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
