@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react'
+import { createClient } from '@supabase/supabase-js'
+
+// Create Supabase client
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL || '',
+  import.meta.env.VITE_SUPABASE_ANON_KEY || ''
+)
 
 interface Team {
   id: string
@@ -48,7 +55,14 @@ const Players: React.FC = () => {
 
   const fetchPlayers = async () => {
     try {
-      const token = localStorage.getItem('auth_token')
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      
+      if (!token) {
+        setError('Authentication required')
+        return
+      }
+
       const response = await fetch('/api/players', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -70,7 +84,14 @@ const Players: React.FC = () => {
 
   const fetchTeams = async () => {
     try {
-      const token = localStorage.getItem('auth_token')
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      
+      if (!token) {
+        console.error('Authentication required for fetching teams')
+        return
+      }
+
       const response = await fetch('/api/teams', {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -107,7 +128,14 @@ const Players: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('auth_token')
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      
+      if (!token) {
+        setError('Authentication required')
+        return
+      }
+
       const response = await fetch('/api/players', {
         method: 'POST',
         headers: {
@@ -143,7 +171,14 @@ const Players: React.FC = () => {
 
   const handleVerifyPlayer = async (playerId: string) => {
     try {
-      const token = localStorage.getItem('auth_token')
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      
+      if (!token) {
+        setError('Authentication required')
+        return
+      }
+
       const response = await fetch(`/api/players/${playerId}/verify`, {
         method: 'PATCH',
         headers: {
@@ -173,7 +208,14 @@ const Players: React.FC = () => {
     }
 
     try {
-      const token = localStorage.getItem('auth_token')
+      const { data: session } = await supabase.auth.getSession()
+      const token = session.session?.access_token
+      
+      if (!token) {
+        setError('Authentication required')
+        return
+      }
+
       const response = await fetch(`/api/players/${playerId}`, {
         method: 'DELETE',
         headers: {

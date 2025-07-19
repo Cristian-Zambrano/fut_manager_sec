@@ -59,4 +59,8 @@ app.route('/teams', teamRoutes)
 app.use('/players/*', authMiddleware)
 app.route('/players', playerRoutes)
 
+// Additional protected route for sanctions (also needs auth)
+app.use('/sanctions/*', authMiddleware)
+app.route('/sanctions', sanctionRoutes)
+
 export default app

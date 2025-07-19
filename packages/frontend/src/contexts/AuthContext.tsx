@@ -19,6 +19,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>
   register: (email: string, password: string, fullName: string, role: 'admin' | 'team_owner' | 'vocal') => Promise<void>
   logout: () => Promise<void>
+  getToken: () => Promise<string | null>
   loading: boolean
 }
 
@@ -51,7 +52,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     })
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, _session) => {
       // if (session?.user) {
       //   await fetchUserProfile(session.user.id)
       // } else {
@@ -161,11 +162,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const getToken = async (): Promise<string | null> => {
+    try {
+      const { data: session } = await supabase.auth.getSession()
+      return session.session?.access_token || null
+    } catch (error) {
+      console.error('Error getting token:', error)
+      return null
+    }
+  }
+
   const value = {
     user,
     login,
     register,
     logout,
+    getToken,
     loading
   }
 

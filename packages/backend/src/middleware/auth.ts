@@ -18,6 +18,7 @@ export const authMiddleware = createMiddleware<{ Bindings: Env, Variables: AuthC
       return c.json({ error: 'Unauthorized: Missing or invalid token' }, 401)
     }
 
+
     const token = authHeader.split(' ')[1]
     
     try {
@@ -35,7 +36,7 @@ export const authMiddleware = createMiddleware<{ Bindings: Env, Variables: AuthC
 
       // Verify the token with Supabase
       const { data: { user }, error } = await supabase.auth.getUser(token)
-      
+
       if (error || !user) {
         return c.json({ error: 'Unauthorized: Invalid token' }, 401)
       }
