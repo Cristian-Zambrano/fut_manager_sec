@@ -8,6 +8,7 @@ import Teams from './pages/Teams'
 import Players from './pages/Players'
 import Sanctions from './pages/Sanctions'
 import Layout from './components/Layout'
+import './index.css'
 
 function App() {
   return (
