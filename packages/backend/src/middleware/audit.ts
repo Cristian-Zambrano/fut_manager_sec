@@ -18,11 +18,17 @@ export const auditMiddleware = createMiddleware<{
 }>(
   async (c, next) => {
     const startTime = Date.now()
+    
     const requestData = {
       method: c.req.method,
       url: c.req.url,
-      headers: Object.fromEntries(c.req.header()),
-      body: c.req.method !== 'GET' ? await c.req.text() : undefined
+      headers: {
+        'content-type': c.req.header('content-type'),
+        'user-agent': c.req.header('user-agent'),
+        'authorization': c.req.header('authorization') ? 'Bearer [REDACTED]' : undefined,
+        'x-forwarded-for': c.req.header('x-forwarded-for'),
+        'cf-connecting-ip': c.req.header('cf-connecting-ip')
+      }
     }
 
     // Create audit logging function

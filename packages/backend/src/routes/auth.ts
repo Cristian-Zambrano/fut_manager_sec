@@ -7,12 +7,12 @@ const authRoutes = new Hono<{ Bindings: Env }>()
 
 // Validation schemas
 const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(6)
 })
 
 const registerSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(6),
   role: z.enum(['admin', 'team_owner', 'vocal']),
   full_name: z.string().min(2)
@@ -78,7 +78,7 @@ authRoutes.post('/register', async (c) => {
   try {
     const body = await c.req.json()
     const { email, password, role, full_name } = registerSchema.parse(body)
-    
+
     // Create Supabase client with service role for user creation
     const supabase = createClient(
       c.env.SUPABASE_URL,
@@ -111,20 +111,19 @@ authRoutes.post('/register', async (c) => {
       return c.json({ error: 'User creation failed' }, 400)
     }
 
-    // Create user profile
-    const { error: profileError } = await supabase
-      .from('user_profiles')
-      .insert({
-        id: data.user.id,
-        email: data.user.email,
-        full_name,
-        role,
-        created_at: new Date().toISOString()
-      })
+    // Wait a moment for the database trigger to create the profile
+    await new Promise(resolve => setTimeout(resolve, 500))
 
-    if (profileError) {
-      console.error('Profile creation error:', profileError)
-      // Try to delete the user if profile creation fails
+    // Verify the profile was created by the trigger
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .eq('id', data.user.id)
+      .single()
+
+    if (profileError || !profile) {
+      console.error('Profile verification error:', profileError)
+      // If profile wasn't created, try to delete the user and fail
       await supabase.auth.admin.deleteUser(data.user.id)
       return c.json({ error: 'Profile creation failed' }, 400)
     }
@@ -134,8 +133,8 @@ authRoutes.post('/register', async (c) => {
       user: {
         id: data.user.id,
         email: data.user.email,
-        role,
-        full_name
+        role: profile.role,
+        full_name: profile.full_name
       }
     })
   } catch (error) {

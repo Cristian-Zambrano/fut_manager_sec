@@ -52,12 +52,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
-      if (session?.user) {
-        await fetchUserProfile(session.user.id)
-      } else {
-        setUser(null)
-        setLoading(false)
-      }
+      // if (session?.user) {
+      //   await fetchUserProfile(session.user.id)
+      // } else {
+      //   setUser(null)
+      //   setLoading(false)
+      // }
     })
 
     return () => subscription.unsubscribe()
