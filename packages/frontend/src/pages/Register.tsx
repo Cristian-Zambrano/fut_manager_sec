@@ -8,7 +8,7 @@ const Register: React.FC = () => {
     password: '',
     confirmPassword: '',
     fullName: '',
-    role: 'team_owner' as 'admin' | 'team_owner' | 'vocal'
+    role: 'team_owner' as 'team_owner' | 'vocal'
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -124,10 +124,9 @@ const Register: React.FC = () => {
               >
                 <option value="team_owner">Team Owner</option>
                 <option value="vocal">Vocal</option>
-                <option value="admin">Administrator</option>
               </select>
               <p className="mt-1 text-xs text-gray-500">
-                Select your role in the championship
+                Select your role in the championship. Admin roles are assigned by system administrators.
               </p>
             </div>
 

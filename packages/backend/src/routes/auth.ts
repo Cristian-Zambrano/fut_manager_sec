@@ -14,7 +14,7 @@ const loginSchema = z.object({
 const registerSchema = z.object({
   email: z.email(),
   password: z.string().min(6),
-  role: z.enum(['admin', 'team_owner', 'vocal']),
+  role: z.enum(['team_owner', 'vocal']),
   full_name: z.string().min(2)
 })
 
@@ -77,6 +77,12 @@ authRoutes.post('/login', async (c) => {
 authRoutes.post('/register', async (c) => {
   try {
     const body = await c.req.json()
+    
+    // Additional security check: Explicitly prevent admin role registration
+    if (body.role === 'admin') {
+      return c.json({ error: 'Admin roles can only be assigned by system administrators' }, 403)
+    }
+    
     const { email, password, role, full_name } = registerSchema.parse(body)
 
     // Create Supabase client with service role for user creation
