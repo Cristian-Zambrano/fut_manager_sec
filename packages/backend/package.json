@@ -9,7 +9,9 @@
     "build": "tsc",
     "test": "vitest",
     "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "deploy": "./scripts/deploy.sh",
+    "deploy:secrets": "./scripts/deploy-secrets.sh"
   },
   "dependencies": {
     "hono": "^4.8.5",
