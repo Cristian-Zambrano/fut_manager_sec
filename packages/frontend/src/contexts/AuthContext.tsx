@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import { getApiUrl } from '../utils/api'
 
@@ -8,17 +8,19 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 )
 
+export type UserRole = 'admin' | 'team_owner' | 'vocal'
+
 interface User {
   id: string
   email: string
-  role: 'admin' | 'team_owner' | 'vocal'
+  role: UserRole
   full_name: string
 }
 
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string, fullName: string, role: 'admin' | 'team_owner' | 'vocal') => Promise<void>
+  register: (email: string, password: string, fullName: string, role: UserRole) => Promise<void>
   logout: () => Promise<void>
   getToken: () => Promise<string | null>
   loading: boolean
@@ -54,12 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, _session) => {
-      // if (session?.user) {
-      //   await fetchUserProfile(session.user.id)
-      // } else {
-      //   setUser(null)
-      //   setLoading(false)
-      // }
+      // Auth state change handling is managed through the initial session check
     })
 
     return () => subscription.unsubscribe()
@@ -173,14 +170,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     login,
     register,
     logout,
     getToken,
     loading
-  }
+  }), [user, loading])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

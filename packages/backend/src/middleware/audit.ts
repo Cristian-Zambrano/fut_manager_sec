@@ -94,6 +94,8 @@ export const auditMiddleware = createMiddleware<{
         responseTime
       }
     } catch (error) {
+      // Log the error for debugging and provide fallback data
+      console.error('Failed to extract response data:', error)
       responseData = {
         status: c.res.status,
         responseTime,

@@ -13,6 +13,18 @@ const Layout: React.FC = () => {
     { name: 'Sanctions', href: '/sanctions', current: location.pathname === '/sanctions' },
   ]
 
+  const getRoleBadgeClasses = (role?: string) => {
+    if (role === 'admin') return 'bg-red-100 text-red-800'
+    if (role === 'vocal') return 'bg-blue-100 text-blue-800'
+    return 'bg-green-100 text-green-800'
+  }
+
+  const getRoleDisplayName = (role?: string) => {
+    if (role === 'admin') return 'Administrator'
+    if (role === 'vocal') return 'Vocal'
+    return 'Team Owner'
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow">
@@ -46,13 +58,9 @@ const Layout: React.FC = () => {
                   {user?.full_name || user?.email}
                 </span>
                 <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                  user?.role === 'admin' ? 'bg-red-100 text-red-800' :
-                  user?.role === 'vocal' ? 'bg-blue-100 text-blue-800' :
-                  'bg-green-100 text-green-800'
+                  getRoleBadgeClasses(user?.role)
                 }`}>
-                  {user?.role === 'admin' ? 'Administrator' :
-                   user?.role === 'vocal' ? 'Vocal' :
-                   'Team Owner'}
+                  {getRoleDisplayName(user?.role)}
                 </span>
               </div>
               <button

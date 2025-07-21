@@ -175,7 +175,6 @@ playerRoutes.get('/:id', async (c) => {
 // Create player - Admin only (S-06, S-07)
 playerRoutes.post('/', requireRole(['admin']), async (c) => {
   try {
-    const user = c.get('user')
     const body = await c.req.json()
     const { name, surname, team_id, position, jersey_number } = createPlayerSchema.parse(body)
     

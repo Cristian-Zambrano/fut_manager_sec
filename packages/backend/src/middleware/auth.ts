@@ -2,11 +2,13 @@ import { createMiddleware } from 'hono/factory'
 import { createClient } from '@supabase/supabase-js'
 import type { Env } from '../index'
 
+export type UserRole = 'admin' | 'team_owner' | 'vocal'
+
 export interface AuthContext {
   user: {
     id: string
     email: string
-    role: 'admin' | 'team_owner' | 'vocal'
+    role: UserRole
   }
 }
 
@@ -14,7 +16,7 @@ export const authMiddleware = createMiddleware<{ Bindings: Env, Variables: AuthC
   async (c, next) => {
     const authHeader = c.req.header('Authorization')
     
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader?.startsWith('Bearer ')) {
       return c.json({ error: 'Unauthorized: Missing or invalid token' }, 401)
     }
 

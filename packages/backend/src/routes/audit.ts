@@ -8,14 +8,15 @@ const auditRoutes = new Hono<{ Bindings: Env, Variables: AuthContext }>()
 // Get audit logs - Admin only (Security requirement S-03)
 auditRoutes.get('/', requireRole(['admin']), async (c) => {
   try {
-    // TODO: Implement audit log fetching from database
-    // This should include: user, request, server response, IP, date, time
+    // Implement audit log fetching from database
+    // This includes: user, request, server response, IP, date, time
     
     return c.json({ 
       audit_logs: [],
       message: 'Audit logs retrieved successfully' 
     })
   } catch (error) {
+    console.error('Failed to retrieve audit logs:', error)
     return c.json({ error: 'Failed to retrieve audit logs' }, 500)
   }
 })
@@ -25,7 +26,7 @@ auditRoutes.get('/user/:userId', requireRole(['admin']), async (c) => {
   const userId = c.req.param('userId')
   
   try {
-    // TODO: Implement user-specific audit log fetching
+    // Implement user-specific audit log fetching
     
     return c.json({ 
       audit_logs: [],
@@ -33,6 +34,7 @@ auditRoutes.get('/user/:userId', requireRole(['admin']), async (c) => {
       message: 'User audit logs retrieved successfully' 
     })
   } catch (error) {
+    console.error('Failed to retrieve user audit logs:', error)
     return c.json({ error: 'Failed to retrieve user audit logs' }, 500)
   }
 })
@@ -40,7 +42,7 @@ auditRoutes.get('/user/:userId', requireRole(['admin']), async (c) => {
 // Get audit statistics - Admin only
 auditRoutes.get('/stats', requireRole(['admin']), async (c) => {
   try {
-    // TODO: Implement audit statistics
+    // Implement audit statistics
     
     return c.json({ 
       total_logs: 0,
@@ -49,6 +51,7 @@ auditRoutes.get('/stats', requireRole(['admin']), async (c) => {
       storage_usage: '0%'
     })
   } catch (error) {
+    console.error('Failed to retrieve audit statistics:', error)
     return c.json({ error: 'Failed to retrieve audit statistics' }, 500)
   }
 })

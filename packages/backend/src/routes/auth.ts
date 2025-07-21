@@ -153,7 +153,7 @@ authRoutes.post('/register', async (c) => {
 authRoutes.post('/logout', async (c) => {
   const authHeader = c.req.header('Authorization')
   
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader?.startsWith('Bearer ')) {
     return c.json({ message: 'Already logged out' })
   }
 

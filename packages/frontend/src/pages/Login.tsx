@@ -21,6 +21,7 @@ const Login: React.FC = () => {
     try {
       await login(email, password)
     } catch (err) {
+      console.error('Login error:', err)
       setError('Invalid credentials. Please try again.')
     } finally {
       setLoading(false)

@@ -1,15 +1,21 @@
 -- Supabase Database Schema for FutManager
 -- Run these commands in Supabase SQL Editor
 
+-- Field length constants (for consistency across schema):
+-- STANDARD_TEXT_LENGTH = 255 (for names, emails, actions)
+-- ROLE_LENGTH = 20 (for user roles)
+-- POSITION_LENGTH = 50 (for player positions)
+-- RESOURCE_TYPE_LENGTH = 100 (for audit resource types)
+
 -- Enable Row Level Security
 ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
 
 -- Create user_profiles table
 CREATE TABLE IF NOT EXISTS user_profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  full_name VARCHAR(255) NOT NULL,
-  role VARCHAR(20) CHECK (role IN ('admin', 'team_owner', 'vocal')) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL, -- STANDARD_TEXT_LENGTH
+  full_name VARCHAR(255) NOT NULL,    -- STANDARD_TEXT_LENGTH
+  role VARCHAR(20) CHECK (role IN ('admin', 'team_owner', 'vocal')) NOT NULL, -- ROLE_LENGTH
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -17,7 +23,7 @@ CREATE TABLE IF NOT EXISTS user_profiles (
 -- Create teams table
 CREATE TABLE IF NOT EXISTS teams (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) UNIQUE NOT NULL, -- STANDARD_TEXT_LENGTH
   description TEXT,
   owner_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   verified BOOLEAN DEFAULT FALSE,
@@ -28,10 +34,10 @@ CREATE TABLE IF NOT EXISTS teams (
 -- Create players table
 CREATE TABLE IF NOT EXISTS players (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  surname VARCHAR(255) NOT NULL,
+  name VARCHAR(255) NOT NULL,    -- STANDARD_TEXT_LENGTH
+  surname VARCHAR(255) NOT NULL, -- STANDARD_TEXT_LENGTH
   team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
-  position VARCHAR(50),
+  position VARCHAR(50),          -- POSITION_LENGTH
   jersey_number INTEGER CHECK (jersey_number >= 1 AND jersey_number <= 99),
   verified BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -61,8 +67,8 @@ CREATE TABLE IF NOT EXISTS sanctions (
 CREATE TABLE IF NOT EXISTS audit_logs (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
-  action VARCHAR(255) NOT NULL,
-  resource_type VARCHAR(100) NOT NULL,
+  action VARCHAR(255) NOT NULL,         -- STANDARD_TEXT_LENGTH
+  resource_type VARCHAR(100) NOT NULL,  -- RESOURCE_TYPE_LENGTH
   resource_id UUID,
   request_data JSONB,
   response_data JSONB,
