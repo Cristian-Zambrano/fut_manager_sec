@@ -7,6 +7,10 @@
 -- POSITION_LENGTH = 50 (for player positions)
 -- RESOURCE_TYPE_LENGTH = 100 (for audit resource types)
 
+-- Common field type constants:
+-- STANDARD_ID = UUID DEFAULT gen_random_uuid() PRIMARY KEY
+-- AUDIT_TIMESTAMP = TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+
 -- Enable Row Level Security
 ALTER DATABASE postgres SET "app.jwt_secret" TO 'your-jwt-secret';
 
@@ -16,46 +20,46 @@ CREATE TABLE IF NOT EXISTS user_profiles (
   email VARCHAR(255) UNIQUE NOT NULL, -- STANDARD_TEXT_LENGTH
   full_name VARCHAR(255) NOT NULL,    -- STANDARD_TEXT_LENGTH
   role VARCHAR(20) CHECK (role IN ('admin', 'team_owner', 'vocal')) NOT NULL, -- ROLE_LENGTH
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- AUDIT_TIMESTAMP
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()  -- AUDIT_TIMESTAMP
 );
 
 -- Create teams table
 CREATE TABLE IF NOT EXISTS teams (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY, -- STANDARD_ID
   name VARCHAR(255) UNIQUE NOT NULL, -- STANDARD_TEXT_LENGTH
   description TEXT,
   owner_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   verified BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- AUDIT_TIMESTAMP
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()  -- AUDIT_TIMESTAMP
 );
 
 -- Create players table
 CREATE TABLE IF NOT EXISTS players (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY, -- STANDARD_ID
   name VARCHAR(255) NOT NULL,    -- STANDARD_TEXT_LENGTH
   surname VARCHAR(255) NOT NULL, -- STANDARD_TEXT_LENGTH
   team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
   position VARCHAR(50),          -- POSITION_LENGTH
   jersey_number INTEGER CHECK (jersey_number >= 1 AND jersey_number <= 99),
   verified BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- AUDIT_TIMESTAMP
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- AUDIT_TIMESTAMP
   -- Ensure jersey number is unique within a team
   UNIQUE(team_id, jersey_number)
 );
 
 -- Create sanctions table
 CREATE TABLE IF NOT EXISTS sanctions (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY, -- STANDARD_ID
   description TEXT NOT NULL,
   amount DECIMAL(10,2) NOT NULL,
   player_id UUID REFERENCES players(id) ON DELETE CASCADE,
   team_id UUID REFERENCES teams(id) ON DELETE CASCADE,
   created_by UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- AUDIT_TIMESTAMP
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(), -- AUDIT_TIMESTAMP
   -- Either player_id or team_id should be set, but not both
   CONSTRAINT check_sanction_target CHECK (
     (player_id IS NOT NULL AND team_id IS NULL) OR 
@@ -65,7 +69,7 @@ CREATE TABLE IF NOT EXISTS sanctions (
 
 -- Create audit_logs table for security requirement S-02
 CREATE TABLE IF NOT EXISTS audit_logs (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY, -- STANDARD_ID
   user_id UUID REFERENCES user_profiles(id) ON DELETE SET NULL,
   action VARCHAR(255) NOT NULL,         -- STANDARD_TEXT_LENGTH
   resource_type VARCHAR(100) NOT NULL,  -- RESOURCE_TYPE_LENGTH
@@ -74,7 +78,7 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   response_data JSONB,
   ip_address INET,
   user_agent TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW() -- AUDIT_TIMESTAMP
 );
 
 -- Create indexes for better performance
