@@ -22,15 +22,29 @@ interface Sanction {
 }
 
 const SanctionsPage: React.FC = () => {
-  const { user } = useAuth()
+  const { user, initialized } = useAuth()
   const [sanctions, setSanctions] = useState<Sanction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const supabase = createClient()
 
   useEffect(() => {
-    fetchSanctions()
-  }, [])
+    console.log('🎯 Sanctions: Effect triggered', { user: !!user, initialized })
+    
+    // Only fetch sanctions when auth is initialized and user exists
+    if (initialized) {
+      if (user) {
+        console.log('✅ Sanctions: Auth ready, fetching sanctions')
+        fetchSanctions()
+      } else {
+        console.log('❌ Sanctions: No user after initialization')
+        setLoading(false)
+        setError('Authentication required')
+      }
+    } else {
+      console.log('⏳ Sanctions: Waiting for auth initialization')
+    }
+  }, [user, initialized])
 
   const fetchSanctions = async () => {
     try {

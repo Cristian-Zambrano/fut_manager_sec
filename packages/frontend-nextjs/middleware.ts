@@ -54,40 +54,69 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if expired - required for Server Components
-  const { data: { session } } = await supabase.auth.getSession()
-
-  // Protected routes
-  const protectedPaths = ['/dashboard', '/teams', '/players', '/sanctions']
-  const authPaths = ['/login', '/register']
-  
-  const isProtectedPath = protectedPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
-  )
-  const isAuthPath = authPaths.some(path => 
-    request.nextUrl.pathname.startsWith(path)
-  )
-
-  // Redirect to login if accessing protected route without session
-  if (isProtectedPath && !session) {
-    return NextResponse.redirect(new URL('/login', request.url))
-  }
-
-  // Redirect to dashboard if accessing auth pages with session
-  if (isAuthPath && session) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
-  }
-
-  // Redirect root to dashboard if authenticated, login if not
-  if (request.nextUrl.pathname === '/') {
-    if (session) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+  try {
+    console.log('🔄 Middleware: Checking session for path:', request.nextUrl.pathname)
+    
+    // Refresh session if expired - required for Server Components
+    const { data: { session }, error } = await supabase.auth.getSession()
+    
+    if (error) {
+      console.error('❌ Middleware: Session error:', error)
     } else {
+      console.log('👤 Middleware: Session user:', session?.user?.id || 'No session')
+    }
+
+    // Protected routes
+    const protectedPaths = ['/dashboard', '/teams', '/players', '/sanctions']
+    const authPaths = ['/login', '/register']
+    
+    const isProtectedPath = protectedPaths.some(path => 
+      request.nextUrl.pathname.startsWith(path)
+    )
+    const isAuthPath = authPaths.some(path => 
+      request.nextUrl.pathname.startsWith(path)
+    )
+
+    // Redirect to login if accessing protected route without session
+    if (isProtectedPath && !session) {
+      console.log('🚫 Middleware: Redirecting to login - no session for protected path')
       return NextResponse.redirect(new URL('/login', request.url))
     }
-  }
 
-  return response
+    // Redirect to dashboard if accessing auth pages with session
+    if (isAuthPath && session) {
+      console.log('✅ Middleware: Redirecting to dashboard - already authenticated')
+      return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    // Redirect root to dashboard if authenticated, login if not
+    if (request.nextUrl.pathname === '/') {
+      if (session) {
+        console.log('✅ Middleware: Redirecting root to dashboard - authenticated')
+        return NextResponse.redirect(new URL('/dashboard', request.url))
+      } else {
+        console.log('🚫 Middleware: Redirecting root to login - not authenticated')
+        return NextResponse.redirect(new URL('/login', request.url))
+      }
+    }
+
+    console.log('✅ Middleware: Allowing request to continue')
+    return response
+
+  } catch (error) {
+    console.error('❌ Middleware: Unexpected error:', error)
+    // On error, allow the request to continue but redirect to login for protected routes
+    const protectedPaths = ['/dashboard', '/teams', '/players', '/sanctions']
+    const isProtectedPath = protectedPaths.some(path => 
+      request.nextUrl.pathname.startsWith(path)
+    )
+    
+    if (isProtectedPath) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    
+    return response
+  }
 }
 
 export const config = {

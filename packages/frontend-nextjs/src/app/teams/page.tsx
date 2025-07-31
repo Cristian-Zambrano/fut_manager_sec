@@ -21,7 +21,7 @@ interface Team {
 }
 
 const TeamsPage: React.FC = () => {
-  const { user } = useAuth()
+  const { user, initialized } = useAuth()
   const [teams, setTeams] = useState<Team[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -34,8 +34,22 @@ const TeamsPage: React.FC = () => {
   const supabase = createClient()
 
   useEffect(() => {
-    fetchTeams()
-  }, [])
+    console.log('🎯 Teams: Effect triggered', { user: !!user, initialized })
+    
+    // Only fetch teams when auth is initialized and user exists
+    if (initialized) {
+      if (user) {
+        console.log('✅ Teams: Auth ready, fetching teams')
+        fetchTeams()
+      } else {
+        console.log('❌ Teams: No user after initialization')
+        setLoading(false)
+        setError('Authentication required')
+      }
+    } else {
+      console.log('⏳ Teams: Waiting for auth initialization')
+    }
+  }, [user, initialized])
 
   const fetchTeams = async () => {
     try {

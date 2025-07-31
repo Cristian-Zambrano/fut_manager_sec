@@ -22,6 +22,7 @@ interface AuthContextType {
   logout: () => Promise<void>
   getToken: () => Promise<string | null>
   loading: boolean
+  initialized: boolean // NUEVO: Estado de inicialización
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -42,21 +43,52 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(null)
   const [supabaseUser, setSupabaseUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
+  const [initialized, setInitialized] = useState(false) // NUEVO
   const supabase = createClient()
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setSupabaseUser(session.user)
-        fetchUserProfile(session.user.id)
-      } else {
-        setLoading(false)
+    let isMounted = true // Prevenir actualizaciones si el componente se desmonta
+
+    const initializeAuth = async () => {
+      try {
+        console.log('🔄 Initializing auth...')
+        
+        // Get initial session
+        const { data: { session }, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('❌ Error getting session:', error)
+          if (isMounted) {
+            setLoading(false)
+            setInitialized(true)
+          }
+          return
+        }
+
+        console.log('👤 Initial session:', session?.user?.id || 'No session')
+
+        if (session?.user && isMounted) {
+          setSupabaseUser(session.user)
+          await fetchUserProfile(session.user.id)
+        } else if (isMounted) {
+          setLoading(false)
+          setInitialized(true)
+        }
+      } catch (error) {
+        console.error('❌ Auth initialization error:', error)
+        if (isMounted) {
+          setLoading(false)
+          setInitialized(true)
+        }
       }
-    })
+    }
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔔 Auth state changed:', event, session?.user?.id || 'No user')
+      
+      if (!isMounted) return
+
       if (session?.user) {
         setSupabaseUser(session.user)
         await fetchUserProfile(session.user.id)
@@ -64,14 +96,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setSupabaseUser(null)
         setUser(null)
         setLoading(false)
+        setInitialized(true)
       }
     })
 
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+    // Initialize auth
+    initializeAuth()
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
+  }, [])
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('👤 Fetching profile for user:', userId)
+      
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
@@ -79,9 +120,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         .single()
 
       if (error) {
-        console.error('Error fetching user profile:', error)
+        console.error('❌ Error fetching user profile:', error)
         setUser(null)
       } else if (data) {
+        console.log('✅ User profile loaded:', data.full_name)
         setUser({
           id: data.id,
           email: data.email,
@@ -90,10 +132,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error)
+      console.error('❌ Error fetching user profile:', error)
       setUser(null)
     } finally {
       setLoading(false)
+      setInitialized(true)
     }
   }
 
@@ -180,15 +223,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  const value = useMemo(() => ({
+  const value = {
     user,
     supabaseUser,
     login,
     register,
     logout,
     getToken,
-    loading
-  }), [user, supabaseUser, loading])
+    loading,
+    initialized // NUEVO
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

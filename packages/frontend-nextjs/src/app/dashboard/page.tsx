@@ -5,7 +5,33 @@ import { useAuth } from '@/contexts/AuthContext'
 import Layout from '@/components/Layout'
 
 const DashboardPage: React.FC = () => {
-  const { user } = useAuth()
+  const { user, loading: authLoading, initialized } = useAuth() // NUEVO: initialized
+
+  // NUEVO: Mostrar loading mientras la auth se inicializa
+  if (!initialized || authLoading) {
+    return (
+      <Layout>
+        <div className="px-4 py-6 sm:px-0">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Initializing authentication...</p>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (!user) {
+    return (
+      <Layout>
+        <div className="px-4 py-6 sm:px-0">
+          <div className="text-center">
+            <p className="text-gray-600">Please log in to view the dashboard.</p>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
 
   return (
     <Layout>
